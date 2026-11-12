@@ -1,24 +1,25 @@
 language: java
 # core streaming still builds on jdk6 and above:
-jdk:
-  - openjdk6
-  - oraclejdk7
-  - oraclejdk8
+# Sealed build: Travis no longer provisions openjdk6/oraclejdk7, so .travis/seal-setup.sh
+# downloads Azul Zulu builds. The JDK 7 leg runs Maven on Zulu 7. The JDK 6 leg keeps
+# Maven on the image's JDK 8 (jackson-parent enforces Java >= 1.7 for the build JVM) and
+# forks the surefire test JVM on Zulu 6, so the suite still executes on Java 6.
+dist: focal
 
-# Below this line is configuration for deploying to the Sonatype OSS repo
-# http://blog.xeiam.com/2013/05/configure-travis-ci-to-deploy-snapshots.html
-before_install: "git clone -b travis `git config --get remote.origin.url` target/travis"
-after_success: "mvn deploy --settings target/travis/settings.xml"
+jobs:
+  include:
+    - jdk: openjdk8
+      env: SEAL_JDK=zulu7.56.0.11-ca-jdk7.0.352-linux_x64
+    - jdk: openjdk8
+      env: SEAL_TEST_JDK=zulu6.22.0.3-jdk6.0.119-linux_x64
+    - jdk: openjdk8
 
-# whitelist
-branches:
-  only:
-    - master
-    - "2.7"
-    - "2.6"
+before_install: source .travis/seal-setup.sh
 
-env:
-  global:
-    - secure: "YW0hrdsHvH41pb5uPJ2DGzXrBgOVT7nEyag/bAQoDcSlOQ/g55tnY6rIGkqE/aYD47IroTEhW4yLyM3tZpbrqwagX4dUX90ukjcUwUvFE1ePTSEfdBtuHVwl8f6HmLIIw2yK0dQ1gOJ21T+3g+wddvK+6sWBJJ+s3O1FePDh6X0="
-    - secure: "sGQxvyfg98BFcJcWHQ5BjvDNhbwdgD1yEfkE3qzH4/gzwD/ND1jKhkCX++Glt3DuyAKhENNzXlSkztdCE5wKfK3X6MVvOgzMgiV/BhHIf09EtAjZ35fe4pr+GZImfGZO3qkViooTz3FDJyKJBA3YyMTuo9/eWK8HlUFCZHTjKP8="
+install: true
 
+script:
+  - mvn -B -V -e -ntp $SEAL_MVN_ARGS test
+  - python3 .travis/surefire-summary.py
+
+after_script: bash .travis/wait-for-log.sh
