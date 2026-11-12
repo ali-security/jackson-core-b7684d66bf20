@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.core.io;
 
 import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.core.util.TextBuffer;
 
@@ -40,6 +41,11 @@ public class IOContext
      * case it acts like the owner).
      */
     protected final boolean _managedResource;
+
+    /**
+     * Constraints for streaming reads.
+     */
+    protected final StreamReadConstraints _streamReadConstraints;
 
     /*
     /**********************************************************
@@ -103,6 +109,7 @@ public class IOContext
         _bufferRecycler = br;
         _sourceRef = sourceRef;
         _managedResource = managedResource;
+        _streamReadConstraints = StreamReadConstraints.builder().build();
     }
 
     public void setEncoding(JsonEncoding enc) {
@@ -126,6 +133,10 @@ public class IOContext
     public Object getSourceReference() { return _sourceRef; }
     public JsonEncoding getEncoding() { return _encoding; }
     public boolean isResourceManaged() { return _managedResource; }
+
+    public StreamReadConstraints streamReadConstraints() {
+        return _streamReadConstraints;
+    }
 
     /*
     /**********************************************************

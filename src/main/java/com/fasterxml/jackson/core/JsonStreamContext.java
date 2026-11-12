@@ -34,6 +34,12 @@ public abstract class JsonStreamContext
      */
     protected int _index;
 
+    /**
+     * The nesting depth is a count of objects and arrays that have not
+     * been closed, `{` and `[` respectively.
+     */
+    protected int _nestingDepth;
+
     /*
     /**********************************************************
     /* Life-cycle
@@ -72,6 +78,14 @@ public abstract class JsonStreamContext
      * that is, content is being read from or written to a Json Object.
      */
     public final boolean inObject() { return _type == TYPE_OBJECT; }
+
+    /**
+     * The nesting depth is a count of objects and arrays that have not
+     * been closed, `{` and `[` respectively.
+     */
+    public final int getNestingDepth() {
+        return _nestingDepth;
+    }
 
     /**
      * Method for accessing simple type description of current context;

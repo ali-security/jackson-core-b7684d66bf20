@@ -62,6 +62,7 @@ public final class JsonReadContext extends JsonStreamContext
         _lineNr = lineNr;
         _columnNr = colNr;
         _index = -1;
+        _nestingDepth = parent == null ? 0 : parent._nestingDepth + 1;
     }
 
     protected void reset(int type, int lineNr, int colNr) {
